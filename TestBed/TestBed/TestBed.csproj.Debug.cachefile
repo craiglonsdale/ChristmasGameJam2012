@@ -1,0 +1,14 @@
+Content\Text.xnb
+Content\Shaders\ClearGBuffer.xnb
+Content\Shaders\RenderGBuffer.xnb
+Content\Shaders\DirectionalLight.xnb
+Content\Shaders\CombineFinal.xnb
+Content\Shaders\PointLight.xnb
+Content\Models\cone.xnb
+Content\Models\sphere.xnb
+Content\Models\ship1.xnb
+Content\Images\Green_Front.xnb
+Content\Images\Red_Front.xnb
+Content\Models\ship1_c_0.xnb
+Content\Models\ship1_n_0.xnb
+Content\Models\ship1_s_0.xnb
