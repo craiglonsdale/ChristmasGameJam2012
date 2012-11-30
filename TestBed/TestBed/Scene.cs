@@ -28,7 +28,6 @@ namespace TestBed
         public void InitializeScene(SpriteBatch spriteBatch, World physicsWorld, Camera2D camera2D)
         {
             m_shipModel = m_game.Content.Load<Model>("Models\\ship1");
-            m_boxModel = m_game.Content.Load<Model>("Models\\wc1");
             Green = m_game.Content.Load<Texture2D>("Images/Green_Front");
             Red = m_game.Content.Load<Texture2D>("Images/Red_Front");
             dynamicTileOne = new DynamicCollidableTile(spriteBatch, Red, new Vector2(250.0f, 160.0f), new Rectangle(0, 0, 5, 5), 0.0f, physicsWorld);

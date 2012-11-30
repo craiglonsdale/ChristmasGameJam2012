@@ -57,25 +57,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Images\earth.png">
-      <Name>earth</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="Images\shuttle.png">
-      <Name>shuttle</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="Images\stars.jpg">
-      <Name>stars</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <None Include="Levels\TestLevel.level">
-      <Name>TestLevel</Name>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <Compile Include="Text.spritefont">
       <Name>Text</Name>
       <Importer>FontDescriptionImporter</Importer>
@@ -116,11 +97,6 @@
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
-    <Compile Include="Models\wc1.FBX">
-      <Name>wc1</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>DeferredRendererModel</Processor>
-    </Compile>
     <Compile Include="Models\ship1.fbx">
       <Name>ship1</Name>
       <Importer>FbxImporter</Importer>
@@ -129,48 +105,10 @@
       <ProcessorParameters_NormalMapTexture>ship1_n.tga</ProcessorParameters_NormalMapTexture>
       <ProcessorParameters_SpecularMapTexture>ship1_s.tga</ProcessorParameters_SpecularMapTexture>
     </Compile>
-    <None Include="TileScripts\BlueEarthBackingTile.tile">
-      <Name>BlueEarthBackingTile</Name>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="TileScripts\RedEarthBackingTile.tile">
-      <Name>RedEarthBackingTile</Name>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Images\Blue_Back.png">
-      <Name>Blue_Back</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="Images\Blue_Front.png">
-      <Name>Blue_Front</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="Images\Green_back.png">
-      <Name>Green_back</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
     <Compile Include="Images\Green_Front.png">
       <Name>Green_Front</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="Images\Orange_Back.png">
-      <Name>Orange_Back</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="Images\Orange_Front.png">
-      <Name>Orange_Front</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
-    </Compile>
-    <Compile Include="Images\Red_Back.png">
-      <Name>Red_Back</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
@@ -202,31 +140,12 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="TileScripts\BlueEarthTile.tile">
-      <Name>BlueEarthTile</Name>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="TileScripts\RedEarthTile.tile">
-      <Name>RedEarthTile</Name>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="NewFolder1\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\..\Deferred Pipeline\Deferred Pipeline.csproj">
       <Project>{AC1D56A7-B6F5-4F57-A5DB-6D916DAADCA7}</Project>
       <Name>Deferred Pipeline</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="DeferredSprite\test.xml">
-      <Name>test</Name>
-      <Importer>XmlImporter</Importer>
-      <Processor>PassThroughProcessor</Processor>
-    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 
