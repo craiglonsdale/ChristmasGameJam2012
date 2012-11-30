@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBed", "TestBed\TestBed\TestBed.csproj", "{B989D8B9-BECF-4751-8AD9-33377F0CD913}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBedContent", "TestBed\TestBedContent\TestBedContent.contentproj", "{610EE6D5-2ADC-4FF9-9338-FD23C52CB54C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Deferred Pipeline", "Deferred Pipeline\Deferred Pipeline.csproj", "{AC1D56A7-B6F5-4F57-A5DB-6D916DAADCA7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B989D8B9-BECF-4751-8AD9-33377F0CD913}.Debug|x86.ActiveCfg = Debug|x86
+		{B989D8B9-BECF-4751-8AD9-33377F0CD913}.Debug|x86.Build.0 = Debug|x86
+		{B989D8B9-BECF-4751-8AD9-33377F0CD913}.Release|x86.ActiveCfg = Release|x86
+		{B989D8B9-BECF-4751-8AD9-33377F0CD913}.Release|x86.Build.0 = Release|x86
+		{610EE6D5-2ADC-4FF9-9338-FD23C52CB54C}.Debug|x86.ActiveCfg = Debug|x86
+		{610EE6D5-2ADC-4FF9-9338-FD23C52CB54C}.Release|x86.ActiveCfg = Release|x86
+		{AC1D56A7-B6F5-4F57-A5DB-6D916DAADCA7}.Debug|x86.ActiveCfg = Debug|x86
+		{AC1D56A7-B6F5-4F57-A5DB-6D916DAADCA7}.Debug|x86.Build.0 = Debug|x86
+		{AC1D56A7-B6F5-4F57-A5DB-6D916DAADCA7}.Release|x86.ActiveCfg = Debug|x86
+		{AC1D56A7-B6F5-4F57-A5DB-6D916DAADCA7}.Release|x86.Build.0 = Debug|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
