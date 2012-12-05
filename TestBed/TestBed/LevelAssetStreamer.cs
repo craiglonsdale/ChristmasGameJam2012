@@ -32,10 +32,7 @@ namespace TestBed
         const int BOTTOM_MIDDLE = 7;
         const int BOTTOM_RIGHT = 8;
 
-        /// <summary>
-        /// SpriteFont to render Debug text with.
-        /// </summary>
-        SpriteFont CourierNew;
+
 
         /// <summary>
         /// The body to render around.
