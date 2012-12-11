@@ -15,6 +15,7 @@ namespace TestBed
         private static GraphicsDevice m_graphics;
 
         private Body m_trackingBody;
+        public Matrix _transform;
 
         private Vector2 m_currentPosition;
         private Vector2 m_targetPosition;
@@ -86,6 +87,17 @@ namespace TestBed
                                  matRotation *
                                  matZoom *
                                  Matrix.CreateTranslation(translateCenter);
+        }
+
+        public Matrix get_transformation()
+        {
+            _transform = // Thanks to o KB o for this solution
+            Matrix.CreateTranslation(new Vector3(-Position.X, -Position.Y, 0)) *
+                //screen view
+            Matrix.CreateRotationZ(Rotation) *
+            Matrix.CreateScale(new Vector3(Zoom, Zoom, 1)) *
+            Matrix.CreateTranslation(new Vector3(m_graphics.Viewport.Width * 0.5f, m_graphics.Viewport.Height * 0.5f, 0));
+            return _transform;
         }
 
         public bool PositionTracking

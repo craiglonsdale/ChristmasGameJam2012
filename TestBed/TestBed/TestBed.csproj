@@ -93,6 +93,12 @@
     <Reference Include="mscorlib">
       <Private>False</Private>
     </Reference>
+    <Reference Include="ProjectMercury">
+      <HintPath>..\ThirdParty\ProjectMercury.dll</HintPath>
+    </Reference>
+    <Reference Include="ProjectMercury.ContentPipeline">
+      <HintPath>..\ThirdParty\ProjectMercury.ContentPipeline.dll</HintPath>
+    </Reference>
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
@@ -116,12 +122,14 @@
     <Compile Include="Character.cs" />
     <Compile Include="ConvertUnits.cs" />
     <Compile Include="DeferredRenderer.cs" />
-    <Compile Include="Dictionary.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="Interface\ICollidableTile.cs" />
     <Compile Include="Interface\ITile.cs" />
     <Compile Include="LevelAssetStreamer.cs" />
+    <Compile Include="LightCausingParticleObject.cs" />
+    <Compile Include="Lighting\DirectionalLight.cs" />
+    <Compile Include="Lighting\PointLight.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="_Game1.cs" />
