@@ -101,7 +101,7 @@ namespace TestBed
             m_spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             m_physicsWorld = new World(new Vector2(0, 20));
             m_camera2D = new Camera2D(GraphicsDevice);
-            m_camera2D.Zoom = 3f;
+            m_camera2D.Zoom = 4f;
 
             m_scene.InitializeScene(m_spriteBatch, m_physicsWorld, m_camera2D);
             m_sphere = Game.Content.Load<Model>(@"Models\sphere");
@@ -151,7 +151,7 @@ namespace TestBed
 
             //Draw 2D Scene
             m_spriteBatch.Begin(0, BlendState.Opaque, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, m_camera2D.BatchViewMatrix);
-                m_scene.Draw2DShit();
+                m_scene.Draw2DShit(m_spriteBatch);
                 //m_scene.WriteText(m_spriteBatch);
                 m_scene.DrawParticles(m_camera2D);
             m_spriteBatch.End();

@@ -126,6 +126,7 @@
     <Compile Include="Input.cs" />
     <Compile Include="Interface\ICollidableTile.cs" />
     <Compile Include="Interface\ITile.cs" />
+    <Compile Include="Level.cs" />
     <Compile Include="LevelAssetStreamer.cs" />
     <Compile Include="LightCausingParticleObject.cs" />
     <Compile Include="Lighting\DirectionalLight.cs" />
