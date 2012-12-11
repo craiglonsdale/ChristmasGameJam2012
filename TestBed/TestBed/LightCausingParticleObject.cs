@@ -16,6 +16,7 @@ namespace TestBed
 
         public LightCausingParticleObject(ParticleEffect effect, Renderer partilceRenderer, PointLight pointLight, ICollidableTile trackingObject)
         {
+            Enabled = true;
             Effect = effect;
             Light = pointLight;
             TrackingObject = trackingObject;
@@ -25,11 +26,29 @@ namespace TestBed
         public void Update(GameTime gameTime, Camera2D camera)
         {
             var position = camera.ConvertWorldToScreen(TrackingObject.PhysicsBody.Position);
-            Effect.Trigger(position);
+
+            if (Enabled)
+            {
+                Effect.Trigger(position);
+            }
+
             Effect.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
             Vector2 lightPosition = ConvertUnits.ToDisplayUnits(TrackingObject.Position);
             Light.LightPosition = new Vector3(lightPosition.X, lightPosition.Y, -100);
+
+        }
+
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        public bool Enabled
+        {
+            get;
+            set;
         }
 
         public void Render(Matrix transformMatrix)

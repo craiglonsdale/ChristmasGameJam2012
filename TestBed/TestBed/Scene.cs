@@ -29,6 +29,7 @@ namespace TestBed
         private Renderer m_particleRenderer;
 
         Model m_shipModel;
+        Model m_floorModel;
 
         public Scene(Game1 game)
         {
@@ -47,6 +48,7 @@ namespace TestBed
         {
             CourierNew = m_game.Content.Load<SpriteFont>("Text");
             m_shipModel = m_game.Content.Load<Model>("Models\\ship1");
+            m_floorModel = m_game.Content.Load<Model>("Models\\Ground");
             Green = m_game.Content.Load<Texture2D>("Images/Green_Front");
             Red = m_game.Content.Load<Texture2D>("Images/Red_Front");
 
@@ -54,7 +56,8 @@ namespace TestBed
             staticTileList = new List<StaticCollidableTile>();
 
             m_particleRenderer.LoadContent(m_game.Content);
-            ParticleEffect pEffect = m_game.Content.Load<ParticleEffect>("ParticleEffects\\BasicFireball");
+            ParticleEffect pEffect = m_game.Content.Load<ParticleEffect>("ParticleEffects\\FlameThrower");
+
 
             AddParticleEffect(pEffect, dynamicTileOne);
 
@@ -146,6 +149,7 @@ namespace TestBed
         private void AddParticleEffect(ParticleEffect particleEffect, ICollidableTile trackingObject)
         {
             particleEffect.LoadContent(m_game.Content);
+
             particleEffect.Initialise();
 
             var entry = new LightCausingParticleObject(particleEffect, m_particleRenderer,
@@ -155,7 +159,11 @@ namespace TestBed
                LightIntensity = 4,
                LightRadius = 50,
                LightPosition = new Vector3(300, 160, -100)
-            }, trackingObject);
+            }, trackingObject)
+            {
+                Name = "FlameThrower",
+                Enabled = false
+            };
 
             ParticleEffects.Add(entry);
         }
@@ -170,13 +178,15 @@ namespace TestBed
             m_game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
             m_game.GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
             m_game.GraphicsDevice.BlendState = BlendState.Opaque;
-
-            for (int i = 0; i < 10; i++)
+            var rotation = 3.141592654f / 2f;
+            for (int i = 0; i < 5; i++)
             {
-                Matrix position = Matrix.CreateRotationY(3.141592654f) * Matrix.CreateTranslation((100 * i), 180, -100);//3.141592654f);
-                DrawModel(m_shipModel, position, camera);
-
+                //Matrix position = Matrix.CreateRotationY(3.141592654f) * Matrix.CreateTranslation((100 * i), 180, -100);//3.141592654f);
+                //DrawModel(m_shipModel, position, camera);
+                DrawModel(m_floorModel, Matrix.CreateRotationX(rotation) * Matrix.CreateTranslation(300+(200 * i), 180, -100), camera);
             }
+
+           
         }
 
         public List<PointLight> PointLights {get; private set;}

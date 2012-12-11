@@ -81,6 +81,16 @@ namespace TestBed
                     body.ApplyForce(new Vector2(-0.005f, 0f));
                 }
             });
+
+            m_input.BindMouseButtonToAction(MouseButton.Left, ButtonState.Pressed, () =>
+            {
+                m_scene.ParticleEffects.Single(effect => effect.Name == "FlameThrower").Enabled = true;
+            });
+
+            m_input.BindMouseButtonToAction(MouseButton.Left, ButtonState.Released, () =>
+            {
+                m_scene.ParticleEffects.Single(effect => effect.Name == "FlameThrower").Enabled = false;
+            });
         }
 
         protected override void LoadContent()
@@ -91,7 +101,7 @@ namespace TestBed
             m_spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             m_physicsWorld = new World(new Vector2(0, 20));
             m_camera2D = new Camera2D(GraphicsDevice);
-            m_camera2D.Zoom = 4f;
+            m_camera2D.Zoom = 3f;
 
             m_scene.InitializeScene(m_spriteBatch, m_physicsWorld, m_camera2D);
             m_sphere = Game.Content.Load<Model>(@"Models\sphere");
@@ -173,12 +183,12 @@ namespace TestBed
         public override void Update(GameTime gameTime)
         {
             // TODO: Add your update code here
-            m_physicsWorld.Step((float)gameTime.ElapsedGameTime.TotalSeconds / 10f);
+            m_physicsWorld.Step((float)gameTime.ElapsedGameTime.TotalSeconds / 2f);
             m_camera2D.Update(gameTime);
             m_camera.Update(gameTime);
             m_input.Update();
 
-            m_scene.ParticleEffects.ForEach(entry => 
+            m_scene.ParticleEffects.ForEach(entry =>
             {
                 entry.Update(gameTime, m_camera2D);
             });

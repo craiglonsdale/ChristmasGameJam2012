@@ -98,23 +98,23 @@ namespace TestBed
         private Dictionary<Chord, ChordState> m_previousChordPressStates;
         private Dictionary<Chord, ChordState> m_currentChordPressStates;
 
-        private Dictionary<MouseButton, Tuple<ButtonState, Action>> m_mouseButtonActionBindings;
-        private Dictionary<MouseButton, ButtonState> m_previousMouseButtonStates;
-        private Dictionary<MouseButton, ButtonState> m_currentMouseButtonStates;
+        private Dictionary<Tuple<MouseButton, ButtonState>, Action> m_mouseButtonActionBindings;
+        private List<Tuple<MouseButton, ButtonState>> m_previousMouseButtonStates;
+        private List<Tuple<MouseButton, ButtonState>> m_currentMouseButtonStates;
 
 
         public Input(Game game)
             : base(game)
         {
             m_chordActionBinding = new Dictionary<Chord/*Combination of keys*/, Action>/*Modifier*/();
-            m_mouseButtonActionBindings = new Dictionary<MouseButton, Tuple<ButtonState, Action>>();
+            m_mouseButtonActionBindings = new Dictionary<Tuple<MouseButton, ButtonState>, Action>();
             m_oldMouseState = Mouse.GetState();
             m_currentMouseState = Mouse.GetState();
 
             m_currentMouseButtonStates = GetCurrentMouseButtonState();
             m_currentChordPressStates = GetCurrentChordPressState();
 
-            m_currentChordPressStates = GetCurrentChordPressState();
+            m_previousMouseButtonStates = m_currentMouseButtonStates;
             m_previousChordPressStates = m_currentChordPressStates;
         }
 
@@ -165,13 +165,13 @@ namespace TestBed
             return currentChordPressState;
         }
 
-        private Dictionary<MouseButton, ButtonState> GetCurrentMouseButtonState()
+        private List<Tuple<MouseButton, ButtonState>> GetCurrentMouseButtonState()
         {
-            var currentMouseButtonStates = new Dictionary<MouseButton, ButtonState>();
+            var currentMouseButtonStates = new List<Tuple<MouseButton, ButtonState>>();
 
-            currentMouseButtonStates.Add(MouseButton.Left, m_currentMouseState.LeftButton);
-            currentMouseButtonStates.Add(MouseButton.Right, m_currentMouseState.RightButton);
-            currentMouseButtonStates.Add(MouseButton.Middle, m_currentMouseState.MiddleButton);
+            currentMouseButtonStates.Add(new Tuple<MouseButton, ButtonState>(MouseButton.Left, m_currentMouseState.LeftButton));
+            currentMouseButtonStates.Add(new Tuple<MouseButton, ButtonState>(MouseButton.Right, m_currentMouseState.RightButton));
+            currentMouseButtonStates.Add(new Tuple<MouseButton, ButtonState>(MouseButton.Middle, m_currentMouseState.MiddleButton));
 
             return currentMouseButtonStates;
         }
@@ -203,30 +203,33 @@ namespace TestBed
         /// <param name="action">Action to perform</param>
         public void BindMouseButtonToAction(MouseButton button, ButtonState state, Action action)
         {
+            var comboDefined = m_mouseButtonActionBindings.Any(entry => entry.Key.Item1 == button && entry.Key.Item2 == state);
             //If that button is not currently in use.
-            if (!m_mouseButtonActionBindings.Keys.Contains(button))
+            if (!comboDefined)
             {
-                m_mouseButtonActionBindings.Add(button, new Tuple<ButtonState, Action>(state, action));
+                m_mouseButtonActionBindings.Add(new Tuple<MouseButton, ButtonState>(button, state), action);
             }
         }
 
         private void ExecuteMousePresses()
         {
             //Get any mouse states that are different from the previous tick
-            var newButtonStates = m_currentMouseButtonStates.Where((mouseButtonState) =>
+            var newButtonStates = m_currentMouseButtonStates.Where(mouseButtonTuple =>
                 {
                     //Check to see if the state of the current button in the list, has the same state
                     //as last tick
-                    return mouseButtonState.Value != m_previousMouseButtonStates[mouseButtonState.Key];
+                    return !m_previousMouseButtonStates.Contains(mouseButtonTuple);
                 }).ToList();
 
-            foreach (var mouseButtonState in newButtonStates)
+            newButtonStates.ForEach(mouseButtonTuple =>
             {
-                if(m_mouseButtonActionBindings.ContainsKey(mouseButtonState.Key) &&
-                   m_mouseButtonActionBindings[mouseButtonState.Key].Item1 == mouseButtonState.Value)
-                    m_mouseButtonActionBindings[mouseButtonState.Key].Item2.Invoke();
-            }
+                if (m_mouseButtonActionBindings.ContainsKey(mouseButtonTuple))
+                {
+                    m_mouseButtonActionBindings[mouseButtonTuple].Invoke();
+                }
+            });
         }
+
         /// <summary>
         /// Responcible for executing Actions when Chord combinations are met.
         /// </summary>

@@ -6,6 +6,7 @@ Content\Shaders\CombineFinal.xnb
 Content\Shaders\PointLight.xnb
 Content\Models\cone.xnb
 Content\Models\sphere.xnb
+Content\Models\Ground.xnb
 Content\Models\ship1.xnb
 Content\Images\Green_Front.xnb
 Content\Images\Red_Front.xnb
@@ -52,6 +53,10 @@ Content\ParticleEffects\Paparazzi.xnb
 Content\ParticleEffects\SimpleRain.xnb
 Content\ParticleEffects\StarTrail.xnb
 Content\ParticleEffects\WaterJet.xnb
+Content\ParticleEffects\FlameThrower.xnb
+Content\Models\ground_diffuse_0.xnb
+Content\Models\ground_normal_0.xnb
+Content\Models\ground_specular_0.xnb
 Content\Models\ship1_c_0.xnb
 Content\Models\ship1_n_0.xnb
 Content\Models\ship1_s_0.xnb
