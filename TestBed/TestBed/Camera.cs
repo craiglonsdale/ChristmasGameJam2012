@@ -163,16 +163,19 @@ namespace TestBed
                 cameraDistance = 100;
             }
 
-            view = Matrix.CreateTranslation(-m_trackingCamera.Position.X, -m_trackingCamera.Position.Y, 0);/* *
+            view = Matrix.CreateTranslation(-m_trackingCamera.Position.X, -m_trackingCamera.Position.Y, 0);
+            /* *
                       Matrix.CreateRotationY(MathHelper.ToRadians(cameraRotation)) *
                       Matrix.CreateRotationX(MathHelper.ToRadians(cameraArc)) *
                       Matrix.CreateLookAt(new Vector3(-m_trackingCamera.Position.X/5, 0, -cameraDistance),
                                           new Vector3(0, 0, 0), Vector3.Up);*/
 
-            position = Vector3.Transform(Vector3.Zero,Matrix.Invert(view));
+            position = Vector3.Transform(Vector3.Zero, Matrix.Invert(view));
+
             if (m_trackingCamera != null)
             {
                 position.X += m_trackingCamera.Position.X;
+                position.Y = 0;
             }
 
             float aspectRatio = (float)Game.Window.ClientBounds.Width /

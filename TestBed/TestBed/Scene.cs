@@ -15,18 +15,21 @@ using FarseerPhysics.Common;
 using FarseerPhysics.Common.Decomposition;
 using FarseerPhysics.Factories;
 using TestBed.Interface;
+using GLEED2D;
 
 namespace TestBed
 {
     public class Scene
     {
         private Game1 m_game;
-        private List<StaticCollidableTile> staticTileList;
         private DynamicCollidableTile dynamicTileOne;
         private Texture2D Green;
         private Texture2D Red;
         private SpriteFont CourierNew;
         private Renderer m_particleRenderer;
+        private Level m_level;
+        private Item m_playerStart;
+        private Body[] collidableBodies;
 
         Model m_shipModel;
         Model m_floorModel;
@@ -34,6 +37,7 @@ namespace TestBed
         public Scene(Game1 game)
         {
             this.m_game = game;
+
             DirectionalLights = new List<TestBed.Lighting.DirectionalLight>();
             PointLights = new List<PointLight>();
             ParticleEffects = new List<LightCausingParticleObject>();
@@ -44,37 +48,55 @@ namespace TestBed
             };
         }
 
+        private void InitializePhysicsScene(World physicsWorld)
+        {
+            //All collidable objects are requires to be in a layer named COllidable
+            var collisionItems = m_level.getLayerByName("Collidable").Items;
+            var collidablePositions = new Vector2[collisionItems.Count];
+            collidableBodies = new Body[collisionItems.Count];
+
+            for (int i = 0; i < collisionItems.Count; ++i)
+            {
+                collidablePositions[i].X = ConvertUnits.ToSimUnits(collisionItems[i].Position.X) + ConvertUnits.ToSimUnits(((RectangleItem)collisionItems[i]).Width) / 2;
+                collidablePositions[i].Y = ConvertUnits.ToSimUnits(collisionItems[i].Position.Y) + ConvertUnits.ToSimUnits(((RectangleItem)collisionItems[i]).Height) / 2;
+                collidableBodies[i] = BodyFactory.CreateRectangle(
+                                            physicsWorld,
+                                            ConvertUnits.ToSimUnits(((RectangleItem)collisionItems[i]).Height),
+                                            ConvertUnits.ToSimUnits(((RectangleItem)collisionItems[i]).Width),
+                                            1f,
+                                            collidablePositions[i]);
+                collidableBodies[i].BodyType = BodyType.Static;
+                collidableBodies[i].Restitution = 0.3f;
+                collidableBodies[i].Friction = 0.5f;
+            }
+        }
+
         public void InitializeScene(SpriteBatch spriteBatch, World physicsWorld, Camera2D camera2D)
         {
+            m_level = Level.FromFile("Content\\Levels\\level1.xml", m_game.Content);
+            //m_playerStart = m_level.getItemByName("heroStart");
+            InitializePhysicsScene(physicsWorld);
             CourierNew = m_game.Content.Load<SpriteFont>("Text");
             m_shipModel = m_game.Content.Load<Model>("Models\\ship1");
             m_floorModel = m_game.Content.Load<Model>("Models\\Ground");
             Green = m_game.Content.Load<Texture2D>("Images/Green_Front");
             Red = m_game.Content.Load<Texture2D>("Images/Red_Front");
 
-            dynamicTileOne = new DynamicCollidableTile(spriteBatch, Red, new Vector2(250.0f, 160.0f), new Rectangle(0, 0, 5, 5), 0.0f, physicsWorld);
-            staticTileList = new List<StaticCollidableTile>();
+            dynamicTileOne = new DynamicCollidableTile(spriteBatch, Red, new Vector2(400.0f, 160.0f), new Rectangle(0, 0, 5, 5), 0.0f, physicsWorld);
 
             m_particleRenderer.LoadContent(m_game.Content);
             ParticleEffect pEffect = m_game.Content.Load<ParticleEffect>("ParticleEffects\\FlameThrower");
 
-
             AddParticleEffect(pEffect, dynamicTileOne);
 
-            for (int i = 0; i < 10; i++)
-            {
-                staticTileList.Add(new StaticCollidableTile(spriteBatch, Green, new Vector2(250.0f + (i * 100), 180.0f), new Rectangle(0, 0, 100, 5), 0.0f, physicsWorld));
-            }
-            
-            camera2D.TrackingBody = ((DynamicCollidableTile)dynamicTileOne).PhysicsBody;
-
+            camera2D.TrackingBody = dynamicTileOne.PhysicsBody;
 
             PointLights.Add(new PointLight()
             {
                Colour = Color.Red,
                LightIntensity = 4,
                LightRadius = 50,
-               LightPosition = new Vector3(300, 160, -100)
+               LightPosition = new Vector3(300, 250, -100)
             });
 
             PointLights.Add(new PointLight()
@@ -82,7 +104,7 @@ namespace TestBed
                 Colour = Color.Green,
                 LightIntensity = 4,
                 LightRadius = 50,
-                LightPosition = new Vector3(500, 160, -100)
+                LightPosition = new Vector3(500, 250, -100)
             });
 
             PointLights.Add(new PointLight()
@@ -90,7 +112,7 @@ namespace TestBed
                 Colour = Color.Yellow,
                 LightIntensity = 4,
                 LightRadius = 50,
-                LightPosition = new Vector3(700, 160, -100)
+                LightPosition = new Vector3(700, 250, -100)
             });
 
             PointLights.Add(new PointLight()
@@ -98,20 +120,24 @@ namespace TestBed
                 Colour = Color.Blue,
                 LightIntensity = 4,
                 LightRadius = 50,
-                LightPosition = new Vector3(900, 160, -100)
+                LightPosition = new Vector3(900, 250, -100)
             });
 
-            DirectionalLights.Add(new Lighting.DirectionalLight()
-            {
-                Colour = Color.White,
-                LightDirection = new Vector3(-1, -1, 0)
-            });
+            //DirectionalLights.Add(new Lighting.DirectionalLight()
+            //{
+            //    Colour = Color.White,
+            //    LightDirection = new Vector3(-1, -1, 0)
+            //});
             
         }
 
-        public void Draw2DShit()
+        public void Draw2DShit(SpriteBatch spriteBatch)
         {
-            staticTileList.ForEach(tile => tile.Draw());
+            foreach (var layer in m_level.Layers)
+            {
+                layer.draw(spriteBatch);
+            }
+
             dynamicTileOne.Draw();
         }
 
@@ -157,7 +183,7 @@ namespace TestBed
             {
                Colour = Color.Orange,
                LightIntensity = 4,
-               LightRadius = 50,
+               LightRadius = 25,
                LightPosition = new Vector3(300, 160, -100)
             }, trackingObject)
             {
@@ -181,9 +207,7 @@ namespace TestBed
             var rotation = 3.141592654f / 2f;
             for (int i = 0; i < 5; i++)
             {
-                //Matrix position = Matrix.CreateRotationY(3.141592654f) * Matrix.CreateTranslation((100 * i), 180, -100);//3.141592654f);
-                //DrawModel(m_shipModel, position, camera);
-                DrawModel(m_floorModel, Matrix.CreateRotationX(rotation) * Matrix.CreateTranslation(300+(200 * i), 180, -100), camera);
+                DrawModel(m_floorModel, Matrix.CreateRotationX(rotation) * Matrix.CreateTranslation(300+(200 * i), 300, -100), camera);
             }
 
            
