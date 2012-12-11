@@ -248,7 +248,7 @@ namespace GLEED2D
             //for example:
             //this.texture = Texture2D.FromFile(<GraphicsDevice>, texture_filename);
             //or by using the Content Pipeline:
-            //this.texture = cm.Load<Texture2D>(asset_name);
+            this.texture = cm.Load<Texture2D>(asset_name);
 
         }
 
