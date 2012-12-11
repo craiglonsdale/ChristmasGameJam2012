@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using FarseerPhysics.Dynamics;
+using TestBed.Lighting;
 
 namespace TestBed
 {
@@ -80,6 +81,16 @@ namespace TestBed
                     body.ApplyForce(new Vector2(-0.005f, 0f));
                 }
             });
+
+            m_input.BindMouseButtonToAction(MouseButton.Left, ButtonState.Pressed, () =>
+            {
+                m_scene.ParticleEffects.Single(effect => effect.Name == "FlameThrower").Enabled = true;
+            });
+
+            m_input.BindMouseButtonToAction(MouseButton.Left, ButtonState.Released, () =>
+            {
+                m_scene.ParticleEffects.Single(effect => effect.Name == "FlameThrower").Enabled = false;
+            });
         }
 
         protected override void LoadContent()
@@ -141,8 +152,11 @@ namespace TestBed
             //Draw 2D Scene
             m_spriteBatch.Begin(0, BlendState.Opaque, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, m_camera2D.BatchViewMatrix);
                 m_scene.Draw2DShit();
+                //m_scene.WriteText(m_spriteBatch);
+                m_scene.DrawParticles(m_camera2D);
             m_spriteBatch.End();
 
+            
 
 
             //=================================================
@@ -155,7 +169,7 @@ namespace TestBed
 
             //    m_spriteBatch.Draw(m_colourRT, new Rectangle(0, 0, halfWidth, halfHeight), Color.White);
             //    m_spriteBatch.Draw(m_normalRT, new Rectangle(0, halfHeight, halfWidth, halfHeight), Color.White);
-            //    m_spriteBatch.Draw(m_depthRT, new Rectangle(halfWidth, 0, halfWidth, halfHeight), Color.White);
+            //    m_spriteBatch.Draw(m_lightRT, new Rectangle(halfWidth, 0, halfWidth, halfHeight), Color.White);
 
             //m_spriteBatch.End();
 
@@ -169,12 +183,16 @@ namespace TestBed
         public override void Update(GameTime gameTime)
         {
             // TODO: Add your update code here
-            m_physicsWorld.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, 1f/10f));
+            m_physicsWorld.Step((float)gameTime.ElapsedGameTime.TotalSeconds / 2f);
             m_camera2D.Update(gameTime);
             m_camera.Update(gameTime);
             m_input.Update();
 
-            
+            m_scene.ParticleEffects.ForEach(entry =>
+            {
+                entry.Update(gameTime, m_camera2D);
+            });
+
             base.Update(gameTime);
         }
 
@@ -243,19 +261,20 @@ namespace TestBed
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
 
-            //Draw some lights Bra!
-            //DrawDirectionalLight(new Vector3(0, -1, 0), Color.White);
-            DrawDirectionalLight(new Vector3(-1, 0, 0), Color.Crimson);
-            //DrawDirectionalLight(new Vector3(1, 0, 0), Color.SkyBlue);
+            foreach (var light in m_scene.DirectionalLights)
+            {
+                DrawDirectionalLight(light.LightDirection, light.Colour);
+            }
 
-            //Creepy moving green light
-            DrawPointLight(new Vector3(30 * (float)Math.Sin(gameTime.TotalGameTime.TotalSeconds), 470, -800),//30 * (float)Math.Cos(gameTime.TotalGameTime.TotalSeconds)),
-                Color.Green,
-                100, 4);
+            foreach (var light in m_scene.PointLights)
+            {
+                DrawPointLight(light.LightPosition, light.Colour, light.LightRadius, light.LightIntensity);
+            }
 
-            //Have a light tracking the character
-            DrawPointLight(new Vector3(10, 470, -800), Color.Blue, 70, 4);
-
+            foreach (var particleEffect in m_scene.ParticleEffects)
+            {
+                DrawPointLight(particleEffect.Light.LightPosition, particleEffect.Light.Colour, particleEffect.Light.LightRadius, particleEffect.Light.LightIntensity);
+            }
 
             GraphicsDevice.BlendState = BlendState.Opaque;
             GraphicsDevice.DepthStencilState = DepthStencilState.None;

@@ -163,11 +163,11 @@ namespace TestBed
                 cameraDistance = 100;
             }
 
-            view = Matrix.CreateTranslation(0, -10, 0) *
+            view = Matrix.CreateTranslation(-m_trackingCamera.Position.X, -m_trackingCamera.Position.Y, 0);/* *
                       Matrix.CreateRotationY(MathHelper.ToRadians(cameraRotation)) *
                       Matrix.CreateRotationX(MathHelper.ToRadians(cameraArc)) *
                       Matrix.CreateLookAt(new Vector3(-m_trackingCamera.Position.X/5, 0, -cameraDistance),
-                                          new Vector3(0, 0, 0), Vector3.Up);
+                                          new Vector3(0, 0, 0), Vector3.Up);*/
 
             position = Vector3.Transform(Vector3.Zero,Matrix.Invert(view));
             if (m_trackingCamera != null)

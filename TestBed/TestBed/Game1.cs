@@ -16,7 +16,7 @@ namespace TestBed
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
-        GraphicsDeviceManager graphics;
+        public GraphicsDeviceManager graphics;
         DeferredRenderer m_renderer;
 
         public Game1()
