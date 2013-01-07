@@ -7,6 +7,7 @@ using TestBed.Lighting;
 using TestBed.Interface;
 using Microsoft.Xna.Framework;
 using ProjectMercury.Renderers;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace TestBed
 {
@@ -23,10 +24,9 @@ namespace TestBed
             m_particleRenderer = partilceRenderer;
         }
 
-        public void Update(GameTime gameTime, Camera2D camera)
+        public void Update(GameTime gameTime, Camera camera, GraphicsDevice graphics)
         {
-            var position = camera.ConvertWorldToScreen(TrackingObject.PhysicsBody.Position);
-
+            var position = camera.ConvertWorldToScreen(TrackingObject.PhysicsBody.Position, graphics);
             if (Enabled)
             {
                 Effect.Trigger(position);
@@ -34,8 +34,8 @@ namespace TestBed
 
             Effect.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
-            Vector2 lightPosition = ConvertUnits.ToDisplayUnits(TrackingObject.Position);
-            Light.LightPosition = new Vector3(lightPosition.X, lightPosition.Y, -100);
+            Vector2 lightPosition =  ConvertUnits.ToDisplayUnits(TrackingObject.Position);
+            Light.LightPosition =  new Vector3(lightPosition.X, lightPosition.Y, 0);
 
         }
 

@@ -31,13 +31,5 @@ namespace TestBed.Tiles
                 return m_3dPosition;
             }
         }
-
-        //public DynamicCollidableTile(SpriteBatch spriteBatch, Texture2D texture, Vector2 position, Body physicsBody, float height, float width, float rotation)
-        //    : base(spriteBatch, texture, position, tileSize, rotation, physicsWorld, density)
-        //{
-        //    PhysicsBody.BodyType = BodyType.Dynamic;
-        //    PhysicsBody.Friction = 0.1f;
-        //}
-
     }
 }
