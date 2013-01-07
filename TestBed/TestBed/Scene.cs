@@ -48,6 +48,28 @@ namespace TestBed
             };
         }
 
+        private void InitializeLightingScene()
+        {
+            //All lighting objects are requires to be in a layer named Lighting
+            var lighting = m_level.getLayerByName("Lighting").Items;
+
+            for (int i = 0; i < lighting.Count; ++i)
+            {
+                Vector3 lightPosition = new Vector3();
+                lightPosition.X = lighting[i].Position.X;
+                lightPosition.Y = lighting[i].Position.Y;
+                lightPosition.Z = 0;
+
+                PointLights.Add(new PointLight()
+                {
+                    Colour = Color.Red,
+                    LightIntensity = 4,
+                    LightRadius = 50,
+                    LightPosition = lightPosition
+                });
+            }
+        }
+
         private void InitializePhysicsScene(World physicsWorld)
         {
             //All collidable objects are requires to be in a layer named COllidable
@@ -71,63 +93,32 @@ namespace TestBed
             }
         }
 
-        public void InitializeScene(SpriteBatch spriteBatch, World physicsWorld, Camera2D camera2D)
+        public void InitializeScene(SpriteBatch spriteBatch, World physicsWorld, Camera camera)
         {
+            
             m_level = Level.FromFile("Content\\Levels\\level1.xml", m_game.Content);
             //m_playerStart = m_level.getItemByName("heroStart");
             InitializePhysicsScene(physicsWorld);
+            InitializeLightingScene();
             CourierNew = m_game.Content.Load<SpriteFont>("Text");
             m_shipModel = m_game.Content.Load<Model>("Models\\ship1");
             m_floorModel = m_game.Content.Load<Model>("Models\\Ground");
             Green = m_game.Content.Load<Texture2D>("Images/Green_Front");
             Red = m_game.Content.Load<Texture2D>("Images/Red_Front");
 
-            dynamicTileOne = new DynamicCollidableTile(spriteBatch, Red, new Vector2(400.0f, 160.0f), new Rectangle(0, 0, 5, 5), 0.0f, physicsWorld);
+            dynamicTileOne = new DynamicCollidableTile(spriteBatch, Red, new Vector2(0.0f, 0.0f), new Rectangle(0, 0, 5, 5), 0.0f, physicsWorld);
+            camera.SetTrackingBody(dynamicTileOne.PhysicsBody);
 
             m_particleRenderer.LoadContent(m_game.Content);
             ParticleEffect pEffect = m_game.Content.Load<ParticleEffect>("ParticleEffects\\FlameThrower");
 
             AddParticleEffect(pEffect, dynamicTileOne);
 
-            camera2D.TrackingBody = dynamicTileOne.PhysicsBody;
-
-            PointLights.Add(new PointLight()
+            DirectionalLights.Add(new Lighting.DirectionalLight()
             {
-               Colour = Color.Red,
-               LightIntensity = 4,
-               LightRadius = 50,
-               LightPosition = new Vector3(300, 250, -100)
+                Colour = Color.White,
+                LightDirection = new Vector3(-1, -1, 0)
             });
-
-            PointLights.Add(new PointLight()
-            {
-                Colour = Color.Green,
-                LightIntensity = 4,
-                LightRadius = 50,
-                LightPosition = new Vector3(500, 250, -100)
-            });
-
-            PointLights.Add(new PointLight()
-            {
-                Colour = Color.Yellow,
-                LightIntensity = 4,
-                LightRadius = 50,
-                LightPosition = new Vector3(700, 250, -100)
-            });
-
-            PointLights.Add(new PointLight()
-            {
-                Colour = Color.Blue,
-                LightIntensity = 4,
-                LightRadius = 50,
-                LightPosition = new Vector3(900, 250, -100)
-            });
-
-            //DirectionalLights.Add(new Lighting.DirectionalLight()
-            //{
-            //    Colour = Color.White,
-            //    LightDirection = new Vector3(-1, -1, 0)
-            //});
             
         }
 
@@ -135,19 +126,17 @@ namespace TestBed
         {
             foreach (var layer in m_level.Layers)
             {
-                layer.draw(spriteBatch);
+                if(layer.Name  == "Textures")
+                    layer.draw(spriteBatch);
             }
 
             dynamicTileOne.Draw();
         }
 
-        public void WriteText(SpriteBatch spriteBatch)
+        public void WriteText(SpriteBatch spriteBatch, GraphicsDevice graphics, Camera camera)
         {
-            spriteBatch.DrawString(CourierNew,
-                                   "\nCharacter Position: " + dynamicTileOne.PositionIn3DDisplay.ToString()
-                                   + "\nLight Position: " + PointLights[0].LightPosition, 
-                                   ConvertUnits.ToDisplayUnits(dynamicTileOne.Position), 
-                                   Color.White, 0, new Vector2(100, 0), 0.33f, SpriteEffects.None, 0);
+            spriteBatch.DrawString(CourierNew, camera.Position.ToString(), new Vector2(graphics.Viewport.Width/2, graphics.Viewport.Height/2), 
+                                   Color.White, 0, new Vector2(0, 0), 5, SpriteEffects.None, 0);
         }
 
         public DynamicCollidableTile Character
@@ -165,7 +154,7 @@ namespace TestBed
                 foreach (Effect effect in mesh.Effects)
                 {
                     effect.Parameters["World"].SetValue(world);
-                    effect.Parameters["View"].SetValue(camera.View);
+                    effect.Parameters["View"].SetValue(camera.View3D);
                     effect.Parameters["Projection"].SetValue(camera.Projection);
                 }
                 mesh.Draw();
@@ -194,9 +183,9 @@ namespace TestBed
             ParticleEffects.Add(entry);
         }
 
-        public void DrawParticles(Camera2D camera)
+        public void DrawParticles(Camera camera, GraphicsDevice graphics)
         {
-            ParticleEffects.ForEach(entity => entity.Render(camera.get_transformation()));
+            ParticleEffects.ForEach(entity => entity.Render(camera.get_transformation(graphics)));
         }
 
         public void DrawScene(Camera camera, GameTime gameTime)
@@ -204,13 +193,11 @@ namespace TestBed
             m_game.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
             m_game.GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
             m_game.GraphicsDevice.BlendState = BlendState.Opaque;
-            var rotation = 3.141592654f / 2f;
+            var rotation = (3.141592654f / 2f);
             for (int i = 0; i < 5; i++)
             {
-                DrawModel(m_floorModel, Matrix.CreateRotationX(rotation) * Matrix.CreateTranslation(300+(200 * i), 300, -100), camera);
+                DrawModel(m_floorModel, Matrix.CreateRotationX(rotation) * Matrix.CreateTranslation(200 * i, 0, 0), camera);
             }
-
-           
         }
 
         public List<PointLight> PointLights {get; private set;}

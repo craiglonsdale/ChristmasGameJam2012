@@ -42,6 +42,10 @@ namespace TestBed
             m_translateCenter = new Vector2(ConvertUnits.ToSimUnits(m_graphics.Viewport.Width / 2.0f),
                                             ConvertUnits.ToSimUnits(m_graphics.Viewport.Height / 2.0f));
 
+            TrackingObjectOffset = Vector2.Zero;
+            TrackBodyX = false;
+            TrackBodyY = false;
+
             ResetCamera();
         }
 
@@ -146,6 +150,11 @@ namespace TestBed
 
             }
         }
+        public Vector2 TrackingObjectOffset
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Current Rotation in Radians
@@ -234,6 +243,10 @@ namespace TestBed
             }
         }
 
+        /// <summary>
+        /// Sets the body for the 2D Camera to track
+        /// Tracking a new body will set TrackBodyX and TrackBodyY to true
+        /// </summary>
         public Body TrackingBody
         {
             get
@@ -247,8 +260,28 @@ namespace TestBed
                 if (m_trackingBody != null)
                 {
                     PositionTracking = true;
+                    TrackBodyX = true;
+                    TrackBodyY = true;
                 }
             }
+        }
+
+        /// <summary>
+        /// Follow the TrackingBody along the X Axis.
+        /// </summary>
+        public bool TrackBodyX
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Follow the TrackingBody along the Y Axis.
+        /// </summary>
+        public bool TrackBodyY
+        {
+            get;
+            set;
         }
 
         public bool EnablePositionTracking
@@ -266,6 +299,8 @@ namespace TestBed
                 else
                 {
                     PositionTracking = false;
+                    TrackBodyX = false;
+                    TrackBodyY = false;
                 }
             }
         }
@@ -339,7 +374,15 @@ namespace TestBed
             {
                 if (PositionTracking)
                 {
-                    m_targetPosition = TrackingBody.Position;
+                    if (TrackBodyX)
+                    {
+                        m_targetPosition.X = TrackingBody.Position.X;
+                    }
+
+                    if (TrackBodyY)
+                    { 
+                        m_targetPosition.Y = TrackingBody.Position.Y;
+                    }
 
                     if (m_minPosition != m_maxPosition)
                     {
@@ -355,22 +398,8 @@ namespace TestBed
                     }
                 }
             }
-            Vector2 delta = m_targetPosition - m_currentPosition;
-            float distance = delta.Length();
-            if (distance > 0f)
-            {
-                delta /= distance;
-            }
-            float inertia;
-            if (distance < 10f)
-            {
-                inertia = (float)Math.Pow(distance / 10.0, 2.0);
-            }
-            else
-            {
-                inertia = 1f;
-            }
 
+            Vector2 delta = m_targetPosition - m_currentPosition;
             float rotDelta = m_targetRotation - m_currentRotation;
 
             float rotInertia;
@@ -387,7 +416,8 @@ namespace TestBed
                 rotDelta /= Math.Abs(rotDelta);
             }
 
-            m_currentPosition += 100f * delta * inertia * Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f));
+            m_currentPosition += 100f * delta * Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f));
+            m_currentPosition += TrackingObjectOffset;
             m_currentRotation += 80f * rotDelta * rotInertia * Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f));
 
             SetView();

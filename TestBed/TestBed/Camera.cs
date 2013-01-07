@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using FarseerPhysics.Dynamics;
+using Microsoft.Xna.Framework.Graphics;
 #endregion
 
 namespace TestBed
@@ -35,7 +37,7 @@ namespace TestBed
             get { return cameraDistance; }
             set { cameraDistance = value; }
         }
-        private Matrix view;
+        private Matrix view3D;
         private Matrix projection;
 
         private Vector3 position;
@@ -43,30 +45,34 @@ namespace TestBed
         public Vector3 Position
         {
             get { return position; }
+            set { position = value; }
         }
 	
-
-        public Matrix View
+        public Matrix View3D
         {
             get
             {
                 
-                return view;
+                return view3D;
             }
         }
+
+        //public Matrix View2D
+        //{
+        //    get
+        //    {
+
+        //        return view2D;
+        //    }
+        //}
 
         public Matrix Projection
         {
             get
             {
-
-                
                 return projection;
             }
         }
-
-        KeyboardState currentKeyboardState = new KeyboardState();
-        GamePadState currentGamePadState = new GamePadState();
 
         public Camera(Game game)
             : base(game)
@@ -85,11 +91,20 @@ namespace TestBed
             base.Initialize();
         }
 
-        public void SetTrackingCamera(Camera2D trackingCamera)
+        public void SetTrackingBody(Body trackingBody)
         {
-            m_trackingCamera = trackingCamera;
+            m_trackingBody = trackingBody;
         }
-        Camera2D m_trackingCamera = null;
+        Body m_trackingBody = null;
+
+        public Matrix get_transformation(GraphicsDevice graphics)
+        {
+            Matrix _transform = 
+            Matrix.CreateTranslation(Position) *
+                //screen view
+            Matrix.CreateTranslation(new Vector3(graphics.Viewport.Width * 0.5f, graphics.Viewport.Height * 0.5f, 0));
+            return _transform;
+        }
 
         /// <summary>
         /// Allows the game component to update itself.
@@ -98,95 +113,54 @@ namespace TestBed
         public override void Update(GameTime gameTime)
         {
 
-            currentKeyboardState = Keyboard.GetState();
-            currentGamePadState = GamePad.GetState(PlayerIndex.One);
-
-            // TODO: Add your update code here
+            //// TODO: Add your update code here
 
             float time = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
-            // Check for input to rotate the camera up and down around the model.
-            if (currentKeyboardState.IsKeyDown(Keys.Up) ||
-                currentKeyboardState.IsKeyDown(Keys.W))
+            if (m_trackingBody != null)
             {
-                cameraArc += time * 0.1f;
+                var pos = ConvertUnits.ToDisplayUnits(m_trackingBody.Position);
+                Position = new Vector3(-pos.X,
+                                       0,
+                                        0);
             }
 
-            if (currentKeyboardState.IsKeyDown(Keys.Down) ||
-                currentKeyboardState.IsKeyDown(Keys.S))
-            {
-                cameraArc -= time * 0.1f;
-            }
+            view3D = Matrix.CreateTranslation(Position) *
+                     //Matrix.CreateRotationY(MathHelper.ToRadians(cameraRotation)) *
+                     //Matrix.CreateScale(0.01f);
+                     //Matrix.CreateRotationX(MathHelper.ToRadians(cameraArc)) *
+                     Matrix.CreateLookAt(new Vector3(0, 0, CameraDistance), new Vector3(0, 0, 0),
+                                           Vector3.Up);
 
-            cameraArc += currentGamePadState.ThumbSticks.Right.Y * time * 0.05f;
-
-            // Limit the arc movement.
-            if (cameraArc > 90.0f)
-                cameraArc = 90.0f;
-            else if (cameraArc < -90.0f)
-                cameraArc = -90.0f;
-
-            // Check for input to rotate the camera around the model.
-            if (currentKeyboardState.IsKeyDown(Keys.Right))// || currentKeyboardState.IsKeyDown(Keys.D))
-            {
-                cameraRotation += time * 0.1f;
-            }
-
-            if (currentKeyboardState.IsKeyDown(Keys.Left))//  ||  currentKeyboardState.IsKeyDown(Keys.A))
-            {
-                cameraRotation -= time * 0.1f;
-            }
-            
-            cameraRotation += currentGamePadState.ThumbSticks.Right.X * time * 0.05f;
-
-            // Check for input to zoom camera in and out.
-            if (currentKeyboardState.IsKeyDown(Keys.Z))
-                cameraDistance += time * 0.25f;
-
-            if (currentKeyboardState.IsKeyDown(Keys.X))
-                cameraDistance -= time * 0.25f;
-
-            cameraDistance += currentGamePadState.Triggers.Left * time * 0.25f;
-            cameraDistance -= currentGamePadState.Triggers.Right * time * 0.25f;
-
-            // Limit the arc movement.
-            if (cameraDistance > 11900.0f)
-                cameraDistance = 11900.0f;
-            else if (cameraDistance < 10.0f)
-                cameraDistance = 10.0f;
-
-            if (currentGamePadState.Buttons.RightStick == ButtonState.Pressed ||
-                currentKeyboardState.IsKeyDown(Keys.R))
-            {
-                cameraArc = -30;
-                cameraRotation = 0;
-                cameraDistance = 100;
-            }
-
-            view = Matrix.CreateTranslation(-m_trackingCamera.Position.X, -m_trackingCamera.Position.Y, 0);
-            /* *
-                      Matrix.CreateRotationY(MathHelper.ToRadians(cameraRotation)) *
-                      Matrix.CreateRotationX(MathHelper.ToRadians(cameraArc)) *
-                      Matrix.CreateLookAt(new Vector3(-m_trackingCamera.Position.X/5, 0, -cameraDistance),
-                                          new Vector3(0, 0, 0), Vector3.Up);*/
-
-            position = Vector3.Transform(Vector3.Zero, Matrix.Invert(view));
-
-            if (m_trackingCamera != null)
-            {
-                position.X += m_trackingCamera.Position.X;
-                position.Y = 0;
-            }
+            Position = Vector3.Transform(Vector3.Zero,Matrix.Invert(View3D));
 
             float aspectRatio = (float)Game.Window.ClientBounds.Width /
                                 (float)Game.Window.ClientBounds.Height;
+
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
                                                                     aspectRatio,
                                                                     1,
                                                                     3000);
             base.Update(gameTime);
         }
+
+        public Vector2 ConvertScreenToWorld(Vector2 location, GraphicsDevice graphics)
+        {
+            Vector3 t = new Vector3(location, 0);
+
+
+            t = graphics.Viewport.Unproject(t, Projection, View3D, Matrix.Identity);
+
+            return new Vector2(t.X, t.Y);
+        }
+
+        public Vector2 ConvertWorldToScreen(Vector2 location, GraphicsDevice graphics)
+        {
+            Vector3 t = new Vector3(location, 0);
+
+            t = graphics.Viewport.Project(t, Projection, View3D, Matrix.Identity);
+
+            return new Vector2(t.X, t.Y);
+        }
     }
 }
-
-

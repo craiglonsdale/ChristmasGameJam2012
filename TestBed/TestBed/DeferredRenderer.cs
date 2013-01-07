@@ -19,7 +19,7 @@ namespace TestBed
     public class DeferredRenderer : Microsoft.Xna.Framework.DrawableGameComponent
     {
         private Camera m_camera;
-        private Camera2D m_camera2D;
+        //private Camera2D m_camera2D;
         private QuadRenderComponent m_quadRenderer;
         private Scene m_scene;
         private Model m_sphere;
@@ -34,6 +34,7 @@ namespace TestBed
         private Effect m_directionalLightEffect;
         private Effect m_combineFinalEffect;
         private Effect m_pointLightEffect;
+        private BasicEffect m_basicEffect;
 
         private SpriteBatch m_spriteBatch;
         private World m_physicsWorld;
@@ -43,6 +44,8 @@ namespace TestBed
             : base(game)
         {
             m_scene = new Scene(game);
+            m_camera = new Camera(Game);
+
         }
 
         /// <summary>
@@ -53,17 +56,33 @@ namespace TestBed
         {
             base.Initialize();
 
-            m_camera = new Camera(Game);
+            
             m_quadRenderer = new QuadRenderComponent(Game);
-
             Game.Components.Add(m_camera);
             Game.Components.Add(m_quadRenderer);
+            //m_camera.SetTrackingBody(m_camera2D);
 
-            m_camera.SetTrackingCamera(m_camera2D);
+            m_basicEffect = new BasicEffect(GraphicsDevice)
+            {
+                TextureEnabled = true,
+                VertexColorEnabled = true
+            };
         }
 
         private void LoadKeyBindings()
         {
+            m_input.BindChordToAction(new Chord { Keys = new List<Keys> { Keys.W }, State = ChordState.Pressed }, () =>
+            {
+                var yPos = m_camera.Position.Y;
+                m_camera.Position = new Vector3(m_camera.Position.X, ++yPos, 0);
+            });
+
+            m_input.BindChordToAction(new Chord { Keys = new List<Keys> { Keys.S }, State = ChordState.Pressed }, () =>
+            {
+                var yPos = m_camera.Position.Y;
+                m_camera.Position = new Vector3(m_camera.Position.X, --yPos, 0);
+            });
+
             m_input.BindChordToAction(new Chord { Keys = new List<Keys> { Keys.D }, State = ChordState.Pressed }, () =>
             {
                 var body = m_scene.Character;
@@ -100,10 +119,9 @@ namespace TestBed
 
             m_spriteBatch = new SpriteBatch(Game.GraphicsDevice);
             m_physicsWorld = new World(new Vector2(0, 20));
-            m_camera2D = new Camera2D(GraphicsDevice);
-            m_camera2D.Zoom = 4f;
+            //m_camera2D = new Camera2D(GraphicsDevice);
 
-            m_scene.InitializeScene(m_spriteBatch, m_physicsWorld, m_camera2D);
+            m_scene.InitializeScene(m_spriteBatch, m_physicsWorld, m_camera);
             m_sphere = Game.Content.Load<Model>(@"Models\sphere");
 
             int backBufferWidth = GraphicsDevice.PresentationParameters.BackBufferWidth;
@@ -145,19 +163,21 @@ namespace TestBed
         {
             //Draw Deferred Render Scene
             SetGBuffer();
+            m_camera.CameraDistance = 200;
             m_scene.DrawScene(m_camera, gameTime);
             ResolveGBuffer();
             DrawLights(gameTime);
-
+    
             //Draw 2D Scene
-            m_spriteBatch.Begin(0, BlendState.Opaque, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, m_camera2D.BatchViewMatrix);
+            m_basicEffect.Projection = m_camera.Projection;
+            m_basicEffect.View = m_camera.View3D;
+            m_basicEffect.World = Matrix.CreateScale(1,-1, 1) *  Matrix.Identity;
+
+            m_spriteBatch.Begin(0, BlendState.Opaque, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, m_basicEffect);
                 m_scene.Draw2DShit(m_spriteBatch);
-                //m_scene.WriteText(m_spriteBatch);
-                m_scene.DrawParticles(m_camera2D);
+                m_scene.WriteText(m_spriteBatch, GraphicsDevice, m_camera);
+                m_scene.DrawParticles(m_camera, GraphicsDevice);
             m_spriteBatch.End();
-
-            
-
 
             //=================================================
             // Deferred Debugging Stuff
@@ -167,9 +187,9 @@ namespace TestBed
 
             //m_spriteBatch.Begin(0, BlendState.Opaque, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
 
-            //    m_spriteBatch.Draw(m_colourRT, new Rectangle(0, 0, halfWidth, halfHeight), Color.White);
-            //    m_spriteBatch.Draw(m_normalRT, new Rectangle(0, halfHeight, halfWidth, halfHeight), Color.White);
-            //    m_spriteBatch.Draw(m_lightRT, new Rectangle(halfWidth, 0, halfWidth, halfHeight), Color.White);
+            //m_spriteBatch.Draw(m_colourRT, new Rectangle(0, 0, halfWidth, halfHeight), Color.White);
+            //m_spriteBatch.Draw(m_normalRT, new Rectangle(0, halfHeight, halfWidth, halfHeight), Color.White);
+            //m_spriteBatch.Draw(m_lightRT, new Rectangle(halfWidth, 0, halfWidth, halfHeight), Color.White);
 
             //m_spriteBatch.End();
 
@@ -184,13 +204,12 @@ namespace TestBed
         {
             // TODO: Add your update code here
             m_physicsWorld.Step((float)gameTime.ElapsedGameTime.TotalSeconds / 2f);
-            m_camera2D.Update(gameTime);
             m_camera.Update(gameTime);
             m_input.Update();
 
             m_scene.ParticleEffects.ForEach(entry =>
             {
-                entry.Update(gameTime, m_camera2D);
+                entry.Update(gameTime, m_camera, GraphicsDevice);
             });
 
             base.Update(gameTime);
@@ -198,6 +217,7 @@ namespace TestBed
 
         private void DrawPointLight(Vector3 lightPosition, Color colour, float lightRadius, float lightIntensity)
         {
+            lightPosition = (Matrix.CreateTranslation(lightPosition) * Matrix.CreateScale(1, -1, 1)).Translation; 
             //Set the GBuffer params
             m_pointLightEffect.Parameters["colourMap"].SetValue(m_colourRT);
             m_pointLightEffect.Parameters["normalMap"].SetValue(m_normalRT);
@@ -208,14 +228,14 @@ namespace TestBed
             Matrix sphereWorldMatrix = Matrix.CreateScale(lightRadius) * Matrix.CreateTranslation(lightPosition);
 
             m_pointLightEffect.Parameters["World"].SetValue(sphereWorldMatrix);
-            m_pointLightEffect.Parameters["View"].SetValue(m_camera.View);
+            m_pointLightEffect.Parameters["View"].SetValue(m_camera.View3D);
             m_pointLightEffect.Parameters["Projection"].SetValue(m_camera.Projection);
             m_pointLightEffect.Parameters["lightPosition"].SetValue(lightPosition);
             m_pointLightEffect.Parameters["Colour"].SetValue(colour.ToVector3());
             m_pointLightEffect.Parameters["lightRadius"].SetValue(lightRadius);
             m_pointLightEffect.Parameters["lightIntensity"].SetValue(lightIntensity);
             m_pointLightEffect.Parameters["cameraPosition"].SetValue(m_camera.Position);
-            m_pointLightEffect.Parameters["InvertViewProjection"].SetValue(Matrix.Invert(m_camera.View * m_camera.Projection));
+            m_pointLightEffect.Parameters["InvertViewProjection"].SetValue(Matrix.Invert(m_camera.View3D * m_camera.Projection));
             m_pointLightEffect.Parameters["halfPixel"].SetValue(m_halfPixel);
 
             //Calculate the distance between the camera and light center
@@ -301,7 +321,7 @@ namespace TestBed
             m_directionalLightEffect.Parameters["cameraPosition"].SetValue(m_camera.Position);
             m_directionalLightEffect.Parameters["halfPixel"].SetValue(m_halfPixel);
 
-            m_directionalLightEffect.Parameters["InvertViewProjection"].SetValue(Matrix.Invert(m_camera.View * m_camera.Projection));
+            m_directionalLightEffect.Parameters["InvertViewProjection"].SetValue(Matrix.Invert(m_camera.View3D * m_camera.Projection));
 
             m_directionalLightEffect.Techniques[0].Passes[0].Apply();
             m_quadRenderer.Render(Vector2.One * -1, Vector2.One);
